@@ -4,12 +4,16 @@ import os
 
 # File paths (replace with your actual paths if running locally)
 
-FOLDER_PATH = r"C:\Github\Data Processing\data_folder\2025-04-30"
+FOLDER_PATH = r"C:\Github\System_data\data_folder\2025-04-30"
 H2_PATH = "GENERATOR_h2_generation.xlsx"
 O2_PATH = "PURIFIER_analyzer.xlsx"
 
 h2_path = os.path.join(FOLDER_PATH, H2_PATH)
 o2_path = os.path.join(FOLDER_PATH, O2_PATH)
+
+# Create the output folder if it doesn't exist under the input folder
+OUTPUT_FOLDER = os.path.join(FOLDER_PATH, "output")
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 # Load Excel files
 h2_df = pd.read_excel(h2_path)
@@ -26,7 +30,6 @@ h2_resampled = (
     .mean()
     .reset_index()[['Time', '[PLC1]ACTUAL_FLOW']]
 )
-
 o2_resampled = (
     o2_df.set_index('Time')
     .resample('5T')
@@ -34,14 +37,18 @@ o2_resampled = (
     .reset_index()[['Time', '[PLC1]ZQ_AI_AT1101']]
 )
 
+# Define filenames
+H2_FILENAME = "H2_generation_5min.xlsx"
+O2_FILENAME = "O2_PPM_5min.xlsx"
 
-# Export selected columns only
-h2_resampled.to_excel(
-    os.path.join(FOLDER_PATH, "H2_generation_5min.xlsx"), index=False
-)
-o2_resampled.to_excel(
-    os.path.join(FOLDER_PATH, "O2_PPM_5min.xlsx"), index=False
-)
+# Use this path for output files
+h2_output_path = os.path.join(OUTPUT_FOLDER, "H2_generation_5min.xlsx")
+o2_output_path = os.path.join(OUTPUT_FOLDER, "O2_PPM_5min.xlsx")
+
+# Save to Excel
+h2_resampled.to_excel(h2_output_path, index=False)
+o2_resampled.to_excel(o2_output_path, index=False)
+
 
 # Plot H2 Flow
 plt.figure(figsize=(12, 5))
