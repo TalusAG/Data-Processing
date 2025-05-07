@@ -2,30 +2,25 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import os
-
-# === Input folder paths for two days ===
-FOLDER_29 = r"C:\Github\System_data\data_folder\2025-04-29"
-FOLDER_30 = r"C:\Github\System_data\data_folder\2025-04-30"
-
-# Filenames inside each folder
-H2_FILENAME = "GENERATOR_h2_generation.xlsx"
-O2_FILENAME = "PURIFIER_analyzer.xlsx"
-
-H2_DENSITY = 0.083  # kg/Nm3 at 20°C, 1 atm
-
+import config
+'''
 # === Load and combine H2 data ===
 h2_dfs = [
-    pd.read_excel(os.path.join(FOLDER_29, H2_FILENAME)),
-    pd.read_excel(os.path.join(FOLDER_30, H2_FILENAME)),
+    pd.read_excel(os.path.join(config.FOLDER_29, config.H2_FILENAME)),
+    pd.read_excel(os.path.join(config.FOLDER_30, config.H2_FILENAME)),
 ]
 h2_df = pd.concat(h2_dfs, ignore_index=True)
 
 # === Load and combine O2 data ===
 o2_dfs = [
-    pd.read_excel(os.path.join(FOLDER_29, O2_FILENAME)),
-    pd.read_excel(os.path.join(FOLDER_30, O2_FILENAME)),
+    pd.read_excel(os.path.join(config.FOLDER_29, config.O2_FILENAME)),
+    pd.read_excel(os.path.join(config.FOLDER_30, config.O2_FILENAME)),
 ]
 o2_df = pd.concat(o2_dfs, ignore_index=True)
+'''
+
+h2_df = pd.read_excel(os.path.join(config.FOLDER_29, config.H2_FILENAME))
+o2_df = pd.read_excel(os.path.join(config.FOLDER_29, config.O2_FILENAME))
 
 # === Convert time columns ===
 h2_df['Time'] = pd.to_datetime(h2_df['Time'])
@@ -40,8 +35,11 @@ h2_resampled = (
     .rename(columns={'[PLC1]ACTUAL_FLOW': 'H2 Generation (Nm^3/hr)'})
 )
 
-# Convert to kg/hr (Nm³ * 0.08988 kg/Nm³)
-h2_resampled['H2 Generation (kg/hr)'] = h2_resampled['H2 Generation (Nm^3/hr)'] * 0.083
+# Convert to kg/hr (Nm³ * 0.083 kg/Nm^3)
+h2_resampled['H2 Generation (kg/hr)'] = (
+    h2_resampled['H2 Generation (Nm^3/hr)']
+    * config.H2_DENSITY
+)
 
 o2_resampled = (
     o2_df.set_index('Time')
@@ -56,7 +54,12 @@ o2_resampled = (
 h2_export = h2_resampled.copy()
 h2_export['Date'] = h2_export['Time'].dt.date.astype(str)
 h2_export['Time'] = h2_export['Time'].dt.time.astype(str)
-h2_export = h2_export[['Date', 'Time', 'H2 Generation (Nm^3/hr)', 'H2 Generation (kg/hr)']]
+h2_export = h2_export[
+    ['Date', 'Time',
+     'H2 Generation (Nm^3/hr)',
+     'H2 Generation (kg/hr)'
+     ]
+]
 
 o2_export = o2_resampled.copy()
 o2_export['Date'] = o2_export['Time'].dt.date.astype(str)
@@ -65,7 +68,7 @@ o2_export = o2_export[['Date', 'Time', 'O2 Concentration (ppm)']]
 
 
 # === Output folder ===
-OUTPUT_FOLDER = os.path.join(FOLDER_30, "output")
+OUTPUT_FOLDER = os.path.join(config.FOLDER_29, "output")
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 # === Save cleaned Excel files ===
@@ -76,7 +79,7 @@ O2_OUTPUT = os.path.join(OUTPUT_FOLDER, "O2_PPM_5min_combined.xlsx")
 h2_export.to_excel(H2_OUTPUT, index=False)
 o2_export.to_excel(O2_OUTPUT, index=False)
 
-
+'''
 # === Plot 1: H2 Nm³/hr ===
 plt.figure(figsize=(12, 5))
 plt.plot(
@@ -130,3 +133,4 @@ plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:%M'))
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
+'''
