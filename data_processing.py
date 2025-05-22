@@ -3,24 +3,26 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import os
 import config
-'''
-# === Load and combine H2 data ===
-h2_dfs = [
-    pd.read_excel(os.path.join(config.FOLDER_29, config.H2_FILENAME)),
-    pd.read_excel(os.path.join(config.FOLDER_30, config.H2_FILENAME)),
-]
-h2_df = pd.concat(h2_dfs, ignore_index=True)
 
-# === Load and combine O2 data ===
-o2_dfs = [
-    pd.read_excel(os.path.join(config.FOLDER_29, config.O2_FILENAME)),
-    pd.read_excel(os.path.join(config.FOLDER_30, config.O2_FILENAME)),
-]
-o2_df = pd.concat(o2_dfs, ignore_index=True)
-'''
 
-h2_df = pd.read_excel(os.path.join(config.FOLDER_29, config.H2_FILENAME))
-o2_df = pd.read_excel(os.path.join(config.FOLDER_29, config.O2_FILENAME))
+if config.COMBINE_DATES == 1:
+    # === Load and combine H2 data ===
+    h2_dfs = [
+        pd.read_excel(os.path.join(config.FOLDER_29, config.H2_FILENAME)),
+        pd.read_excel(os.path.join(config.FOLDER_30, config.H2_FILENAME)),
+    ]
+    h2_df = pd.concat(h2_dfs, ignore_index=True)
+
+    # === Load and combine O2 data ===
+    o2_dfs = [
+        pd.read_excel(os.path.join(config.FOLDER_29, config.O2_FILENAME)),
+        pd.read_excel(os.path.join(config.FOLDER_30, config.O2_FILENAME)),
+    ]
+    o2_df = pd.concat(o2_dfs, ignore_index=True)
+
+elif config.COMBINE_DATES == 0:
+    h2_df = pd.read_excel(os.path.join(config.FOLDER_TWO_DATES, config.H2_FILENAME))
+    o2_df = pd.read_excel(os.path.join(config.FOLDER_TWO_DATES, config.O2_FILENAME))
 
 # === Convert time columns ===
 h2_df['Time'] = pd.to_datetime(h2_df['Time'])
@@ -68,7 +70,7 @@ o2_export = o2_export[['Date', 'Time', 'O2 Concentration (ppm)']]
 
 
 # === Output folder ===
-OUTPUT_FOLDER = os.path.join(config.FOLDER_29, "output")
+OUTPUT_FOLDER = os.path.join(config.FOLDER_TWO_DATES, "output")
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 # === Save cleaned Excel files ===
